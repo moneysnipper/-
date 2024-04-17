@@ -104,17 +104,38 @@ if __name__ == '__main__':
     3. 加载预训练的LSTM模型。
     4. 点击预测按钮以生成预测。
     """)
-    if uploaded_file is not None:
-        # 读取数据
-        df = pd.read_csv(uploaded_file,engine='python',index_col=[0])
-        # 获取列数
+    # 读取CSV文件
+    if 'uploaded_file' in st.session_state:
+        uploaded_file = st.session_state['uploaded_file']
+    else:
+        uploaded_file = st.sidebar.file_uploader("请选择CSV文件", type=["csv"])
+        if uploaded_file is not None:
+            st.session_state['uploaded_file'] = uploaded_file
+            # 读取数据
+            df = pd.read_csv(uploaded_file, index_col=[0])
+            st.session_state['df'] = df
 
-        print(f'行数: {df.shape[0]}')
-        # 显示数据框架
-        if st.sidebar.checkbox("Show dataframe"):
-            st.write(df)
+    # 如果已上传文件，则显示可用列并在主页面绘制走势图
+    if 'df' in st.session_state:
+        df = st.session_state['df']
+        # 显示可选项
+        if 'available_columns' in st.session_state:
+            available_columns = st.session_state['available_columns']
+        else:
+            available_columns = df.columns.tolist()
+            st.session_state['available_columns'] = available_columns
 
-        # 分析数据 （这里放上你的数据分析代码）
+        # 选择列
+        selected_column = st.sidebar.selectbox("选择要查看的列", available_columns)
+        st.session_state['selected_column'] = selected_column
+        # 绘制走势图
+        if st.session_state.get('selected_column'):
+            st.line_chart(df[st.session_state['selected_column']])
+        else:
+            st.warning("请选择要查看的列")
+
+
+
 
         # 检查是否已经加载了模型，如果没有，则初始化状态
         if 'model' not in st.session_state:
