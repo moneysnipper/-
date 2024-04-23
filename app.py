@@ -38,7 +38,7 @@ def load_saved_model(model_path):
 st.set_page_config(page_title="Data Exploration and Prediction Interface", layout="wide")
 
 # 侧边栏选择上传文件
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+#uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
 
 
@@ -91,19 +91,18 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 # 上传CSV文件，查看数据，并使用预训练的LSTM模型进行预测。
 # """)
 
-
-
-if __name__ == '__main__':
-
+def main():
     model = None
-    st.markdown("""
-    ## 使用说明
 
-    1. 通过侧边栏上传CSV文件。
-    2. 查看并分析数据，如果需要的话。
-    3. 加载预训练的LSTM模型。
-    4. 点击预测按钮以生成预测。
-    """)
+    st.sidebar.markdown("""
+        ## 使用说明
+
+        1. 通过侧边栏上传CSV文件。
+        2. 查看并分析数据，如果需要的话。
+        3. 加载预训练的LSTM模型。
+        4. 点击预测按钮以生成预测。
+        """)
+
     # 读取CSV文件
     if 'uploaded_file' in st.session_state:
         uploaded_file = st.session_state['uploaded_file']
@@ -211,3 +210,6 @@ if __name__ == '__main__':
 
     
     """)
+
+if __name__ == '__main__':
+    main()
