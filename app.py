@@ -1,10 +1,10 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import load_model
-from logging import log
+
 
 # 数据窗口划分
 def createXY(dataset,n_past):  #N_past是我们在预测下一个目标值时将在过去查看的步骤数。
@@ -37,61 +37,8 @@ def load_saved_model(model_path):
 # 设置页面
 st.set_page_config(page_title="Data Exploration and Prediction Interface", layout="wide")
 
-# 侧边栏选择上传文件
-#uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
-
-
-
-# if uploaded_file is not None:
-#     # 读取数据
-#     df = pd.read_csv(uploaded_file)
-#
-#     # 显示数据框架
-#     if st.sidebar.checkbox("Show dataframe"):
-#         st.write(df)
-#
-#     # 分析数据 （这里放上你的数据分析代码）
-#
-#     # 已保存的 LSTM 模型加载
-#     model = None
-#     if st.sidebar.button("Load LSTM model"):
-#         model = load_saved_model(model_path="my_lstm_model.h5")
-#         st.sidebar.text(f"Model loaded successfully! \t {model}")
-#
-#     if st.sidebar.button("Predict"):
-#         st.sidebar.text(f"Model loaded successfully! \t {model}")
-#
-#     # # 预测
-#     # if model and st.sidebar.button("Predict"):
-#     #     log.info(f"{model} Predicting...")
-#     #     try:
-#     #         # LSTM模型的输入数据预处理部分（实际情况可能有所不同）
-#     #         # 此处我们假设数据已经被预处理并且整齐
-#     #         # 数据标准化
-#     #         log.info(f"read for predicting...")
-#     #         scaler = MinMaxScaler(feature_range=(0, 1))
-#     #         df1_scaled = scaler.fit_transform(df)
-#     #         print(df1_scaled[0])
-#     #         df1_X, df1_Y = createXY(df1_scaled, 60)
-#     #         pred1 = model.predict(df1_X)
-#     #         prediction1_copies_array = np.repeat(pred1, 7, axis=-1)
-#     #         pred1_actual = scaler.inverse_transform(np.reshape(prediction1_copies_array, (len(pred1), 7)))[:, 0]
-#     #         # 预测结果可视化
-#     #         st.write("预测结果:")
-#     #         for i, pred in enumerate(pred1_actual):
-#     #             st.write(f"预测结果 {i + 1}: {pred}")
-#     #     except Exception as e:
-#     #         st.sidebar.write("An error occurred during prediction.")
-#     #         st.sidebar.write(e)
-#
-# # 添加说明
-# st.write("""
-# # Data Exploration and Prediction Interface
-#
-# 上传CSV文件，查看数据，并使用预训练的LSTM模型进行预测。
-# """)
-
 def main():
+    global residuals
     model = None
 
     st.sidebar.markdown("""
@@ -102,6 +49,12 @@ def main():
         3. 加载预训练的LSTM模型。
         4. 点击预测按钮以生成预测。
         """)
+    # 添加说明
+    st.write("""
+       # Data Exploration and Prediction Interface
+
+
+       """)
 
     # 读取CSV文件
     if 'uploaded_file' in st.session_state:
@@ -204,12 +157,42 @@ def main():
                 st.sidebar.write("An error occurred during prediction.")
                 st.sidebar.write(e)
 
-    # 添加说明
-    st.write("""
-    # Data Exploration and Prediction Interface
 
-    
-    """)
+            # 假设你已有以下变量定义
+            window_size = 360  # 窗口大小
+            step = 60  # 滑动步长
+            threshold = 500  # 预警阈值
+
+            # 检测函数
+            def detect_anomalies(residuals):
+                num_windows = (len(residuals) - window_size) // step + 1
+                alerts = []
+                for i in range(num_windows):
+                    start_idx = i * step
+                    end_idx = start_idx + window_size
+                    # 计算窗口内残差的均值
+                    window_mean = np.mean(residuals[start_idx:end_idx])
+                    # 检查是否触发警报
+                    if window_mean > threshold:
+                        alerts.append((start_idx, start_idx + window_size, window_mean))
+                return alerts
+
+            try:
+                # ...（其他预测和绘图代码）
+                #residuals = actual_aligned - pred1_actual
+                # 调用检测函数
+                alerts = detect_anomalies(residuals)
+                print(alerts)
+                if alerts:
+                    for alert in alerts:
+                        st.error(
+                            f"警报: 从 {alert[0]} 到 {alert[1]} 时间步的残差均值为 {alert[2]:.2f}，超过阈值 {threshold}！")
+                else:
+                    st.success("没有检测到异常。")
+            except Exception as e:
+                st.sidebar.write("An error occurred during yujing.")
+                st.sidebar.write(e)
+
 
 if __name__ == '__main__':
     main()

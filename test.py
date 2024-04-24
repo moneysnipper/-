@@ -7,8 +7,8 @@ import app
 if __name__ == "__main__":
     # 用户信息，后续可以来自DB
     names = ['Oil领域用户', '管理员']  # 用户名
-    usernames = ['llm-oil', 'dataManagerAdmin']  # 登录名
-    passwords = ['S6rJam', 'Abcd1234!#!']  # 登录密码
+    usernames = ['zdm', 'dataManagerAdmin']  # 登录名
+    passwords = ['12345', 'Abcd1234!#!']  # 登录密码
     # 对密码进行加密操作，后续将这个存放在credentials中
     hashed_passwords = stauth.Hasher(passwords).generate()
 
